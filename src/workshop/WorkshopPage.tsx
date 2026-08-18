@@ -351,9 +351,30 @@ export function WorkshopPage() {
             </Button>
 
             {error ? (
-              <p className="mt-4 rounded-xl bg-cinnabar-soft px-3 py-2 text-sm text-cinnabar-deep">
-                {error}
-              </p>
+              <div className="mt-4 space-y-2">
+                <p className="rounded-xl bg-cinnabar-soft px-3 py-2 text-sm text-cinnabar-deep">
+                  {error}
+                </p>
+                {/未配置|AGNES_API_KEY|OPENAI_API_KEY/.test(error) ? (
+                  <div className="rounded-xl border border-gold/40 bg-gold/10 px-3 py-3 text-sm text-ink">
+                    <p className="font-medium">生成功能需要一个 AI 生图密钥</p>
+                    <p className="mt-1 text-ink-soft">
+                      请前往 Agnes 平台注册并获取密钥后，由站点配置启用：
+                    </p>
+                    <a
+                      href="https://platform.agnes-ai.com/settings/apiKeys"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 inline-block break-all font-medium text-cinnabar underline underline-offset-2"
+                    >
+                      https://platform.agnes-ai.com/settings/apiKeys
+                    </a>
+                    <p className="mt-1 text-ink-soft">
+                      也可以改用 OpenAI 图像生成作为备选方案。
+                    </p>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
           </div>
 

@@ -37,6 +37,8 @@ Convex 函数位于 `src/convex/`。
 | `CONVEX_DEPLOYMENT` / `VITE_CONVEX_URL` | 由 `convex dev` 自动生成 |
 | `JWT_PRIVATE_KEY` / `JWKS` | Convex Auth 会话签名密钥，由平台托管管理 |
 
+申请 Agnes 密钥：<https://platform.agnes-ai.com/settings/apiKeys>（也可使用 OpenAI 图像生成作为备选）。
+
 ## 文化说明
 
 窗花从属于剪纸的应用形式，不是独立工艺门类。青花是瓷器装饰语言。云锦是织造技艺。具体出处见站内「文化资料」。
