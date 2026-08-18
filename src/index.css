@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    background-image:
+      radial-gradient(circle at 12% 6%, rgba(192, 58, 43, 0.06), transparent 42%),
+      radial-gradient(circle at 88% 12%, rgba(200, 155, 60, 0.09), transparent 38%),
+      radial-gradient(circle at 50% 108%, rgba(46, 110, 94, 0.06), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    @apply bg-cinnabar text-paper;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-paper-deep;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink-faint/40;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .paper-fiber {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+
+  .svg-preview svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
