@@ -17,6 +17,12 @@ import {
 import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import { ACTIVITY } from "../lib/activity";
+import {
+  buildAgnesPrompt,
+  generateViaLocalApi,
+  requestAgnesImage,
+  type AgnesResult,
+} from "../lib/agnes";
 import { CRAFTS, craftById } from "../lib/crafts";
 import {
   loadGuestWorks,
@@ -26,6 +32,7 @@ import {
 } from "../lib/guestWorks";
 import { Brand } from "../components/Brand";
 import { CutFlower } from "../components/CutFlower";
+import { PatternView } from "../components/PatternView";
 import { ShareCard } from "../components/ShareCard";
 import { SiteFooter } from "../components/SiteFooter";
 import { useCulture } from "../components/CultureProvider";
@@ -33,16 +40,33 @@ import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
 import { cn } from "../lib/utils";
 
-function downloadSvg(svg: string, filename: string) {
-  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+function downloadFile(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${filename}.svg`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+function downloadSvg(svg: string, filename: string) {
+  downloadFile(
+    new Blob([svg], { type: "image/svg+xml;charset=utf-8" }),
+    `${filename}.svg`,
+  );
+}
+
+async function downloadImage(imageUrl: string, filename: string) {
+  try {
+    const res = await fetch(imageUrl);
+    const blob = await res.blob();
+    const ext = blob.type.includes("jpeg") ? "jpg" : "png";
+    downloadFile(blob, `${filename}.${ext}`);
+  } catch {
+    window.open(imageUrl, "_blank", "noopener,noreferrer");
+  }
 }
 
 type GalleryItem = {
@@ -50,6 +74,7 @@ type GalleryItem = {
   craft: string;
   prompt: string;
   svg: string;
+  imageUrl?: string;
 };
 
 export function WorkshopPage() {
@@ -64,6 +89,7 @@ export function WorkshopPage() {
   const [craft, setCraft] = useState("jianzhi");
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -81,13 +107,37 @@ export function WorkshopPage() {
         craft: item.craft,
         prompt: item.prompt,
         svg: item.svg,
+        imageUrl: undefined,
       }))
     : guestWorks.map((item) => ({
         _id: item.id,
         craft: item.craft,
         prompt: item.prompt,
         svg: item.svg,
+        imageUrl: item.imageUrl,
       }));
+
+  async function createArtwork(craftId: string, trimmed: string) {
+    try {
+      return await generateViaLocalApi(craftId, trimmed);
+    } catch {
+      // Preview sandbox may not be able to call Agnes from the server.
+    }
+
+    const browserKey = import.meta.env.VITE_AGNES_API_KEY;
+    if (browserKey) {
+      return await requestAgnesImage(
+        browserKey,
+        buildAgnesPrompt(craftId, trimmed),
+      );
+    }
+
+    const convexResult = (await generate({
+      craft: craftId,
+      prompt: trimmed,
+    })) as AgnesResult;
+    return convexResult;
+  }
 
   async function handleGenerate() {
     const trimmed = prompt.trim();
@@ -95,16 +145,30 @@ export function WorkshopPage() {
     setGenerating(true);
     setError(null);
     try {
-      const { svg } = await generate({ craft, prompt: trimmed });
-      setResult(svg);
+      const artwork = await createArtwork(craft, trimmed);
+      setResult(artwork.svg);
+      setImageUrl(artwork.imageUrl ?? null);
       if (isAuthenticated) {
-        await createGeneration({ craft, prompt: trimmed, svg });
+        await createGeneration({ craft, prompt: trimmed, svg: artwork.svg });
       } else {
-        const saved = saveGuestWork({ craft, prompt: trimmed, svg });
+        const saved = saveGuestWork({
+          craft,
+          prompt: trimmed,
+          svg: artwork.svg,
+          imageUrl: artwork.imageUrl,
+        });
         setGuestWorks((prev) => [saved, ...prev].slice(0, 12));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "生成失败，请重试");
+      const message =
+        err instanceof Error ? err.message : "生成失败，请重试";
+      if (/Failed to fetch|NetworkError|CORS|Load failed/i.test(message)) {
+        setError(
+          "当前预览环境无法连上 Agnes。请确认密钥有效，或在可访问外网的环境打开。",
+        );
+      } else {
+        setError(message);
+      }
     } finally {
       setGenerating(false);
     }
@@ -184,7 +248,7 @@ export function WorkshopPage() {
             选一种风格，生成你的国风作品
           </h1>
           <p className="mt-3 text-ink-soft">
-            输入一句灵感，AI 会参考对应传统视觉语言生成矢量纹样。
+            输入一句灵感，Agnes Image 会参考对应传统视觉语言生成一张国风纹样图。
           </p>
           <button
             type="button"
@@ -205,6 +269,7 @@ export function WorkshopPage() {
                 onClick={() => {
                   setCraft(item.id);
                   setResult(null);
+                  setImageUrl(null);
                   setError(null);
                 }}
                 className={cn(
@@ -308,11 +373,10 @@ export function WorkshopPage() {
                   <CutFlower className="h-20 w-20 animate-spin [animation-duration:4s]" />
                   <p className="text-sm">正在生成纹样，稍候片刻…</p>
                 </div>
-              ) : result ? (
-                <div
-                  className="max-h-full w-full max-w-md rounded-xl bg-white p-3 shadow-md"
-                  dangerouslySetInnerHTML={{ __html: result }}
-                />
+              ) : result || imageUrl ? (
+                <div className="max-h-full w-full max-w-md rounded-xl bg-white p-3 shadow-md">
+                  <PatternView svg={result} imageUrl={imageUrl} />
+                </div>
               ) : (
                 <div className="flex flex-col items-center gap-3 text-center text-ink-faint">
                   <CutFlower className="h-24 w-24 opacity-40" />
@@ -323,24 +387,26 @@ export function WorkshopPage() {
               )}
             </div>
 
-            {result ? (
+            {result || imageUrl ? (
               <div className="flex flex-col gap-2 border-t border-ink/10 p-4 sm:flex-row">
                 <Button
                   className="min-h-11 flex-1"
-                  onClick={() =>
-                    downloadSvg(
-                      result,
-                      `${activeCraft.name}-${prompt.slice(0, 12) || "纹样"}-${Date.now()}`,
-                    )
-                  }
+                  onClick={() => {
+                    const name = `${activeCraft.name}-${prompt.slice(0, 12) || "纹样"}-${Date.now()}`;
+                    if (imageUrl) {
+                      void downloadImage(imageUrl, name);
+                      return;
+                    }
+                    if (result) downloadSvg(result, name);
+                  }}
                 >
                   <Download className="h-4 w-4" />
-                  下载 SVG
+                  {imageUrl ? "下载图片" : "下载 SVG"}
                 </Button>
                 <Button
                   variant="outline"
                   className="min-h-11"
-                  onClick={() => void handleCopy(result)}
+                  onClick={() => void handleCopy(imageUrl || result || "")}
                 >
                   {copied ? (
                     <Check className="h-4 w-4 text-jade" />
@@ -367,7 +433,12 @@ export function WorkshopPage() {
                 AI 辅助生成 · 国风元素参考
               </span>
             </div>
-            <ShareCard svg={result} prompt={prompt || "未命名纹样"} craft={activeCraft} />
+            <ShareCard
+              svg={result || ""}
+              imageUrl={imageUrl}
+              prompt={prompt || "未命名纹样"}
+              craft={activeCraft}
+            />
           </section>
         ) : null}
 
@@ -422,12 +493,14 @@ export function WorkshopPage() {
                           variant="ghost"
                           size="icon"
                           aria-label="下载"
-                          onClick={() =>
-                            downloadSvg(
-                              item.svg,
-                              `${itemCraft.name}-${item.prompt.slice(0, 12)}-${item._id.slice(-6)}`,
-                            )
-                          }
+                          onClick={() => {
+                            const name = `${itemCraft.name}-${item.prompt.slice(0, 12)}-${item._id.slice(-6)}`;
+                            if (item.imageUrl) {
+                              void downloadImage(item.imageUrl, name);
+                              return;
+                            }
+                            downloadSvg(item.svg, name);
+                          }}
                         >
                           <Download className="h-4 w-4" />
                         </Button>

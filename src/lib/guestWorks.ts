@@ -3,6 +3,7 @@ export type GuestWork = {
   craft: string;
   prompt: string;
   svg: string;
+  imageUrl?: string;
   createdAt: number;
 };
 
@@ -34,6 +35,7 @@ export function saveGuestWork(
     craft: work.craft,
     prompt: work.prompt,
     svg: work.svg,
+    imageUrl: work.imageUrl,
   };
   const list = [next, ...loadGuestWorks()].slice(0, LIMIT);
   if (canUseStorage()) {

@@ -30,7 +30,9 @@ Convex 函数位于 `src/convex/`。
 
 | 变量 | 说明 |
 | --- | --- |
-| `OPENAI_API_KEY` | 生成纹样所需，由 AI 服务提供（在 API Keys 中配置） |
+| `AGNES_API_KEY` | Agnes Image 2.1 Flash 生图密钥，服务端优先使用 |
+| `VITE_AGNES_API_KEY` | 仅本地/预览浏览器直连时使用，不要提交到 Git |
+| `OPENAI_API_KEY` | 未配置 Agnes 时的 SVG 兜底 |
 | `OPENAI_MODEL` | 可选，默认 `gpt-4o-mini` |
 | `CONVEX_DEPLOYMENT` / `VITE_CONVEX_URL` | 由 `convex dev` 自动生成 |
 | `JWT_PRIVATE_KEY` / `JWKS` | Convex Auth 会话签名密钥，由平台托管管理 |

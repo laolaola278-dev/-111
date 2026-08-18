@@ -1,13 +1,16 @@
 import { ACTIVITY } from "../lib/activity";
 import { type Craft } from "../lib/crafts";
 import { Brand } from "./Brand";
+import { PatternView } from "./PatternView";
 
 export function ShareCard({
   svg,
+  imageUrl,
   prompt,
   craft,
 }: {
   svg: string;
+  imageUrl?: string | null;
   prompt: string;
   craft: Craft;
 }) {
@@ -20,10 +23,9 @@ export function ShareCard({
         </span>
       </div>
       <div className="px-4 pt-3">
-        <div
-          className="svg-preview rounded-2xl bg-white p-3 shadow-sm"
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
+        <div className="overflow-hidden rounded-2xl bg-white p-3 shadow-sm">
+          <PatternView svg={svg} imageUrl={imageUrl} />
+        </div>
       </div>
       <figcaption className="space-y-2 px-5 pb-5 pt-4">
         <p className="font-serif text-lg font-bold leading-snug">「{prompt}」</p>

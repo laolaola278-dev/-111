@@ -70,12 +70,67 @@ function extractSvg(raw: string): string | null {
   return svg;
 }
 
+function wrapImageSvg(imageUrl: string): string {
+  const safe = imageUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><image href="${safe}" width="1024" height="1024" preserveAspectRatio="xMidYMid meet"/></svg>`;
+}
+
+function buildImagePrompt(craftId: string, userPrompt: string): string {
+  const craft = CRAFTS[craftId] ?? CRAFTS.jianzhi;
+  return [
+    `Create one square decorative artwork inspired by Chinese traditional visual language: ${craft.name}.`,
+    `User theme: ${userPrompt}`,
+    `Visual features: ${craft.style}`,
+    `Palette: ${craft.palette}`,
+    craft.caution,
+    "Original AI digital recreation. No text, letters, numbers, seals, signatures, dates, or heritage badges.",
+    "Not a photograph of a handmade artifact and not a complete restoration.",
+    "Centered, high detail, clean background.",
+  ].join("\n");
+}
+
 export const generate = action({
   args: { craft: v.string(), prompt: v.string() },
   handler: async (_ctx, args) => {
+    const agnesKey = process.env.AGNES_API_KEY;
+    if (agnesKey) {
+      const res = await fetch(
+        "https://apihub.agnes-ai.com/v1/images/generations",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${agnesKey}`,
+          },
+          body: JSON.stringify({
+            model: "agnes-image-2.1-flash",
+            prompt: buildImagePrompt(args.craft, args.prompt),
+            size: "1K",
+            ratio: "1:1",
+            extra_body: { response_format: "url" },
+          }),
+        },
+      );
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(`Agnes 生成失败（${res.status}）：${text.slice(0, 280)}`);
+      }
+      const data = JSON.parse(text) as {
+        data?: Array<{ url?: string; b64_json?: string }>;
+      };
+      const item = data?.data?.[0];
+      const imageUrl =
+        item?.url ||
+        (item?.b64_json ? `data:image/png;base64,${item.b64_json}` : "");
+      if (!imageUrl) {
+        throw new Error("Agnes 未返回图片，请换个提示词重试");
+      }
+      return { svg: wrapImageSvg(imageUrl), imageUrl };
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      throw new Error("未配置 OPENAI_API_KEY，请在 API Keys 中添加后重试");
+      throw new Error("未配置 AGNES_API_KEY 或 OPENAI_API_KEY");
     }
 
     const craft = CRAFTS[args.craft] ?? CRAFTS.jianzhi;
