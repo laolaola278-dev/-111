@@ -1,12 +1,20 @@
-# 非遗工坊 · AI 纹样创作
+# 非遗工坊 · 国风 Vibe Coding
 
-选择一项非遗技艺，输入一句灵感，AI 生成可下载、可剪裁的传统纹样 SVG。
+选择一种传统视觉语言，输入一句灵感，AI 生成可下载的矢量纹样。
+
+这是一个「国风 × Vibe Coding」互动创作实验。生成结果属于 AI 再创作，不代表对传统工艺的完整复原。
+
+## 体验
+
+- 游客无需注册即可生成、下载、截图
+- 登录后可将作品保存到云端纹样库
+- 页脚「文化资料」可查看分类说明与参考来源
 
 ## 技术栈
 
 - React 19 + TypeScript + Vite
 - Convex（后端、数据库、认证）
-- Convex Auth（邮箱 + 密码）
+- Convex Auth（邮箱 + 密码，仅用于保存作品）
 - Tailwind CSS + Framer Motion
 
 ## 本地开发
@@ -26,3 +34,7 @@ Convex 函数位于 `src/convex/`。
 | `OPENAI_MODEL` | 可选，默认 `gpt-4o-mini` |
 | `CONVEX_DEPLOYMENT` / `VITE_CONVEX_URL` | 由 `convex dev` 自动生成 |
 | `JWT_PRIVATE_KEY` / `JWKS` | Convex Auth 会话签名密钥，由平台托管管理 |
+
+## 文化说明
+
+窗花从属于剪纸的应用形式，不是独立工艺门类。青花是瓷器装饰语言。云锦是织造技艺。具体出处见站内「文化资料」。

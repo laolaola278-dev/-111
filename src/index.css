@@ -57,4 +57,16 @@
     width: 100%;
     height: auto;
   }
+
+  .share-card svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .share-card {
+    max-width: 100%;
+  }
 }

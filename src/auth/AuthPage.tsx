@@ -57,16 +57,16 @@ export function AuthPage() {
           <Brand className="[&_span]:text-paper" />
           <div>
             <h1 className="text-balance font-serif text-4xl font-black leading-tight">
-              每一刀，
+              登录只为
               <br />
-              都剪在千年传承上。
+              把作品留下来。
             </h1>
             <p className="mt-4 max-w-sm text-paper/85">
-              登录非遗工坊，开始把一句灵感变成可下载、可剪裁的传统纹样。
+              工坊本身无需登录。注册后可以把纹样同步到你的作品库。
             </p>
           </div>
           <p className="text-xs text-paper/60">
-            剪纸 · 窗花 · 皮影 · 年画 · 青花 · 云锦
+            国风 × Vibe Coding · AI 再创作
           </p>
         </div>
       </div>
@@ -90,8 +90,8 @@ export function AuthPage() {
           </h2>
           <p className="mt-2 text-sm text-ink-soft">
             {flow === "signIn"
-              ? "登录后继续你的纹样创作。"
-              : "只需一个邮箱，即可保存你的作品。"}
+              ? "登录后保存作品。游客也可直接进入工坊体验。"
+              : "只需一个邮箱，即可把作品同步到云端。"}
           </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-5">
@@ -139,6 +139,12 @@ export function AuthPage() {
           </form>
 
           <p className="mt-6 text-center text-sm text-ink-soft">
+            <Link to="/workshop" className="font-medium text-cinnabar hover:underline">
+              先去游客体验
+            </Link>
+          </p>
+
+          <p className="mt-4 text-center text-sm text-ink-soft">
             {flow === "signIn" ? "还没有账号？" : "已经有账号？"}
             <button
               type="button"
@@ -154,7 +160,7 @@ export function AuthPage() {
         </div>
 
         <p className="mt-8 text-center text-xs text-ink-faint">
-          登录即表示你同意非遗工坊的使用条款与隐私政策。
+          登录仅用于保存作品。生成结果属于 AI 再创作，不代表传统工艺复原。
         </p>
       </div>
     </div>
