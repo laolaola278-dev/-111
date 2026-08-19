@@ -82,6 +82,7 @@ export default defineConfig(({ mode }) => {
   const apiKey = env.AGNES_API_KEY || env.VITE_AGNES_API_KEY || "";
 
   return {
+    base: "./",
     plugins: [react(), agnesGeneratePlugin(apiKey)],
     server: {
       host: "0.0.0.0",
