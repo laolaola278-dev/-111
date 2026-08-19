@@ -18,6 +18,7 @@ import { CRAFTS } from "../lib/crafts";
 import { ActivityChip } from "./ActivityChip";
 import { Brand } from "./Brand";
 import { CutFlower } from "./CutFlower";
+import { PaperCut3D } from "./PaperCut3D";
 import { useCulture } from "./CultureProvider";
 import { SiteFooter } from "./SiteFooter";
 import { Button } from "./ui/button";
@@ -95,6 +96,9 @@ export function LandingPage() {
             <Brand />
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-ink-soft md:flex">
+            <Link to="/3d" className="transition-colors hover:text-cinnabar">
+              立体剪纸
+            </Link>
             <a href="#how" className="transition-colors hover:text-cinnabar">
               创作流程
             </a>
@@ -201,7 +205,11 @@ export function LandingPage() {
           className="relative mx-auto grid aspect-square w-full max-w-md place-items-center"
         >
           <div className="absolute inset-0 rounded-full bg-cinnabar/5" />
-          <CutFlower className="animate-float-slow h-[78%] w-[78%] drop-shadow-xl" />
+          <PaperCut3D
+            className="h-[86%] w-[86%]"
+            autoRotate
+            interactive={false}
+          />
 
           {["剪纸", "窗花", "皮影", "年画", "青花", "云锦"].map((label, i) => {
             const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
@@ -308,6 +316,41 @@ export function LandingPage() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section id="3d" className="border-b border-ink/10 bg-paper py-20">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 lg:grid-cols-2">
+          <Reveal>
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cinnabar">
+              立体剪纸 · 粒子特效
+            </p>
+            <h2 className="text-balance mt-3 font-serif text-3xl font-bold sm:text-4xl">
+              让剪纸在三维里<span className="text-cinnabar">发光、转动</span>
+            </h2>
+            <p className="mt-4 max-w-xl leading-relaxed text-ink-soft">
+              程序化生成的 3D 纸灯笼：红纸镂空透出暖光，金色星火上升环绕，剪纸纸屑在空中飘落。
+              可拖拽旋转、滚轮缩放，全程在浏览器实时渲染。
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/3d">
+                <Button size="lg">
+                  进入立体剪纸
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div className="relative mx-auto grid aspect-square w-full max-w-sm place-items-center">
+              <CutFlower className="animate-float-slow h-full w-full opacity-90" petals={14} />
+              <CutFlower
+                className="animate-float-slow absolute h-[72%] w-[72%] [animation-delay:0.9s]"
+                petals={8}
+                color="#C89B3C"
+              />
+            </div>
+          </Reveal>
         </div>
       </section>
 

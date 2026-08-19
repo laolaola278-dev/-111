@@ -9,6 +9,7 @@
 - 游客无需注册即可生成、下载、截图
 - 登录后可将作品保存到云端纹样库
 - 页脚「文化资料」可查看分类说明与参考来源
+- `/3d`「立体剪纸」：程序化 3D 纸灯笼 + 粒子特效（星火 + 纸屑），可拖拽旋转 / 滚轮缩放
 
 ## 技术栈
 
@@ -16,6 +17,7 @@
 - Convex（后端、数据库、认证）
 - Convex Auth（邮箱 + 密码，仅用于保存作品）
 - Tailwind CSS + Framer Motion
+- Three.js（`/3d` 立体剪纸：LatheGeometry 纸灯笼 + CanvasTexture 镂空贴图 + Points / InstancedMesh 粒子）
 
 ## 本地开发
 
